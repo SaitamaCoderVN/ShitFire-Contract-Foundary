@@ -15,23 +15,23 @@ contract ShitCoinTest is Test {
         shitCoin = new ShitCoin();
     }
 
-    function testInitialSupply() public {
+    function testInitialSupply() public view {
         assertEq(shitCoin.totalSupply(), INITIAL_SUPPLY);
     }
 
-    function testOwnerBalance() public {
+    function testOwnerBalance() public view {
         assertEq(shitCoin.balanceOf(owner), INITIAL_SUPPLY);
     }
 
-    function testTokenName() public {
+    function testTokenName() public view {
         assertEq(shitCoin.name(), "SHIT");
     }
 
-    function testTokenSymbol() public {
+    function testTokenSymbol() public view {
         assertEq(shitCoin.symbol(), "SHIT");
     }
 
-    function testTokenDecimals() public {
+    function testTokenDecimals() public view {
         assertEq(shitCoin.decimals(), 18);
     }
 
