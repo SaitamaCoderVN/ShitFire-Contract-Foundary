@@ -80,7 +80,6 @@ contract ShitNFTTest is Test {
         vm.prank(user1);
         shitNFT.airdropTokens();
         vm.prank(user1);
-        
         // Check NFTs are burned
         assertEq(shitNFT.balanceOf(user1), 0);
         vm.expectRevert(abi.encodeWithSelector(IERC721Errors.ERC721NonexistentToken.selector, 0));
