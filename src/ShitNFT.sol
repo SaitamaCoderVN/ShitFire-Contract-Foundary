@@ -26,18 +26,16 @@ contract ShitNFT is ERC721, ERC721URIStorage, ERC721Burnable, Ownable {
         address minter;
         uint256 tokenId;
     }
-    
+
     MintInfo[] private _mintHistory;
     mapping(address => bool) private _hasMinted;
     mapping(address => uint256) private _minterTokenCount;
     mapping(uint256 => bool) private _burnedTokens;
 
-    constructor(
-        address _airdropToken,
-        uint256 _tokenPerNFT,
-        address _rewardToken,
-        uint256 _rewardPerNFT
-    ) ERC721("DragonShitNFT", "DragonShitNFT") Ownable(msg.sender) {
+    constructor(address _airdropToken, uint256 _tokenPerNFT, address _rewardToken, uint256 _rewardPerNFT)
+        ERC721("DragonShitNFT", "DragonShitNFT")
+        Ownable(msg.sender)
+    {
         require(_airdropToken != address(0), "Invalid airdrop token address");
         require(_tokenPerNFT > 0, "Invalid token amount per NFT");
         require(_rewardToken != address(0), "Invalid reward token address");
@@ -73,11 +71,7 @@ contract ShitNFT is ERC721, ERC721URIStorage, ERC721Burnable, Ownable {
      * @param to The address to which the token is transferred.
      * @param tokenId The ID of the token being transferred.
      */
-    function transferFrom(address from, address to, uint256 tokenId)
-        public
-        override(ERC721, IERC721)
-        virtual
-    {
+    function transferFrom(address from, address to, uint256 tokenId) public virtual override(ERC721, IERC721) {
         require(from == address(0), "Err: token transfer is BLOCKED");
         super.transferFrom(from, to, tokenId);
     }
@@ -87,12 +81,7 @@ contract ShitNFT is ERC721, ERC721URIStorage, ERC721Burnable, Ownable {
      * @param tokenId The ID of the token for which the URI will be retrieved.
      * @return string The URI for the token metadata.
      */
-    function tokenURI(uint256 tokenId)
-        public
-        view
-        override(ERC721, ERC721URIStorage)
-        returns (string memory)
-    {
+    function tokenURI(uint256 tokenId) public view override(ERC721, ERC721URIStorage) returns (string memory) {
         return super.tokenURI(tokenId);
     }
 
@@ -101,12 +90,7 @@ contract ShitNFT is ERC721, ERC721URIStorage, ERC721Burnable, Ownable {
      * @param interfaceId The ID of the interface.
      * @return bool True if the contract supports the given interface, false otherwise.
      */
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        override(ERC721, ERC721URIStorage)
-        returns (bool)
-    {
+    function supportsInterface(bytes4 interfaceId) public view override(ERC721, ERC721URIStorage) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 
@@ -181,7 +165,10 @@ contract ShitNFT is ERC721, ERC721URIStorage, ERC721Burnable, Ownable {
         }
 
         require(airdropToken.balanceOf(msg.sender) >= totalAirdropAmount, "Err: Insufficient airdrop token balance");
-        require(rewardToken.balanceOf(address(this)) >= totalRewardAmount, "Err: Insufficient reward token balance in contract");
+        require(
+            rewardToken.balanceOf(address(this)) >= totalRewardAmount,
+            "Err: Insufficient reward token balance in contract"
+        );
 
         for (uint256 i = 0; i < eligibleMintersCount; i++) {
             require(airdropToken.transferFrom(msg.sender, eligibleMinters[i], tokenPerNFT), "Err: Airdrop failed");
@@ -202,10 +189,10 @@ contract ShitNFT is ERC721, ERC721URIStorage, ERC721Burnable, Ownable {
         for (uint256 i = 0; i < tokenIds.length; i++) {
             uint256 tokenId = tokenIds[i];
             address minter = _mintHistory[tokenId].minter;
-            
+
             super._burn(tokenId);
             _burnedTokens[tokenId] = true;
-            
+
             _minterTokenCount[minter]--;
             if (_minterTokenCount[minter] == 0) {
                 _removeMinter(minter);
@@ -229,7 +216,7 @@ contract ShitNFT is ERC721, ERC721URIStorage, ERC721Burnable, Ownable {
      * @dev Prevents any external burn attempts by overriding the `burn` function from `ERC721Burnable`.
      * This function does nothing and will revert if called.
      */
-    function burn(uint256 /*tokenId*/) public pure override(ERC721Burnable) {
+    function burn(uint256 /*tokenId*/ ) public pure override(ERC721Burnable) {
         revert("Err: Direct burn not allowed");
     }
 

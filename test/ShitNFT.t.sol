@@ -23,12 +23,7 @@ contract ShitNFTTest is Test {
         airdropToken = new ShitCoin();
         rewardToken = new ShitCoin();
 
-        shitNFT = new ShitNFT(
-            address(airdropToken),
-            TOKEN_PER_NFT,
-            address(rewardToken),
-            REWARD_PER_NFT
-        );
+        shitNFT = new ShitNFT(address(airdropToken), TOKEN_PER_NFT, address(rewardToken), REWARD_PER_NFT);
 
         // Cấp token cho contract và người dùng
         rewardToken.transfer(address(shitNFT), 1000000 * 1e18);
