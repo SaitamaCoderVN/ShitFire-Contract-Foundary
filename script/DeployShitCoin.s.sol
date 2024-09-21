@@ -6,12 +6,15 @@ import "../src/ShitCoin.sol";
 import "../lib/forge-std/src/console.sol";
 
 contract DeployShitCoin is Script {
+    ShitCoin public shitCoin;
+    
+    function setUp() public {}
+
     function run() external {
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        shitCoin = new ShitCoin();
 
-        vm.startBroadcast(deployerPrivateKey);
+        vm.startBroadcast();
 
-        ShitCoin shitCoin = new ShitCoin();
         console.log("ShitCoin deployed at:", address(shitCoin));
 
         vm.stopBroadcast();
