@@ -1,0 +1,185 @@
+version: "3"
+
+tasks:
+  boot-api:
+    dotenv: [".env"]
+    cmds:
+      - go run ./cmd/boot_api/main.go
+  admin:
+    dotenv: [".env"]
+    cmds:
+      - go run ./cmd/admin/main.go
+  node:
+    dotenv: [".env"]
+    cmds:
+      - go run ./cmd/node/main.go
+  por:
+    dotenv: [".env"]
+    cmds:
+      - go run ./cmd/por/main.go
+
+  fetcher:
+    dotenv: [".env"]
+    cmds:
+      - go run ./cmd/fetcher/main.go
+
+  script-submission:
+    dotenv: [".env"]
+    cmds:
+      - go run ./script/test_submission/main.go
+  script-fetcher-test:
+    dotenv: [".env"]
+    cmds:
+      - go run ./script/test_fetcher/main.go
+  script-fetcher-aggregator-test:
+    dotenv: [".env"]
+    cmds:
+      - go run ./script/test_fetcher_and_aggregator/main.go
+  script-test-connection:
+    dotenv: [".env"]
+    cmds:
+      - go run ./script/test_connection/main.go -p={{.P}} -b={{.B}}
+  script-test-raft:
+    dotenv: [".env"]
+    cmds:
+      - go run ./script/test_raft/main.go -p={{.P}}
+  script-test-websocketfetcher:
+    dotenv: [".env"]
+    cmds:
+      - go run ./script/test_websocketfetcher/main.go
+
+  test-db:
+    dotenv: [".env"]
+    cmds:
+      - go test ./pkg/db -v
+  test-admin:
+    dotenv: [".env"]
+    cmds:
+      - go test ./pkg/admin/tests -v
+  test-fetcher:
+    dotenv: [".env"]
+    cmds:
+      - go test ./pkg/fetcher -v
+  test-aggregator:
+    dotenv: [".env"]
+    cmds:
+      - go test ./pkg/aggregator -v
+  test-utils:
+    dotenv: [".env"]
+    cmds:
+      - go test ./pkg/utils/tests -v
+  test-bus:
+    cmds:
+      - go test ./pkg/bus -v
+  test-libp2p:
+    dotenv: [".env"]
+    cmds:
+      - go test ./pkg/libp2p/tests -v
+  test-reporter:
+    dotenv: [".env"]
+    cmds:
+      - go test ./pkg/reporter -v
+  test-boot:
+    dotenv: [".env"]
+    cmds:
+      - go test ./pkg/boot/tests -v
+  test-chain:
+    dotenv: [".env"]
+    cmds:
+      - go test ./pkg/chain/tests -v
+  test-por:
+    dotenv: [".env"]
+    cmds:
+      - go test ./pkg/por -v
+  test-wss:
+    cmds:
+      - go test ./pkg/wss -v
+  test-websocketfetcher:
+    dotenv: [".env"]
+    cmds:
+      - go test ./pkg/websocketfetcher/tests -v
+
+  check-api:
+    dotenv: [".env"]
+    cmds:
+      - curl -X GET "http://localhost:$APP_PORT/api/v1"
+  refresh-fetcher:
+    dotenv: [".env"]
+    cmds:
+      - curl -X POST "http://localhost:$APP_PORT/api/v1/fetcher/refresh"
+  refresh-aggregator:
+    dotenv: [".env"]
+    cmds:
+      - curl -X POST "http://localhost:$APP_PORT/api/v1/aggregator/refresh"
+  refresh-reporter:
+    dotenv: [".env"]
+    cmds:
+      - curl -X POST "http://localhost:$APP_PORT/api/v1/reporter/refresh"
+  add-proxy:
+    dotenv: [".env"]
+    cmds:
+      - |
+        curl -X POST "http://localhost:$APP_PORT/api/v1/proxy" \
+        -H "Content-Type: application/json" \
+        -d '{"protocol": "{{.PROTOCOL}}", "host": "{{.HOST}}", "port": {{.PORT}}, "location": "{{.LOCATION}}"}'| jq
+  remove-proxy:
+    dotenv: [".env"]
+    cmds:
+      - |
+        curl -X DELETE "http://localhost:$APP_PORT/api/v1/proxy/{{.ID}}" \
+        -H "Content-Type: application/json" | jq
+  get-proxy:
+    dotenv: [".env"]
+    cmds:
+      - curl -X GET "http://localhost:$APP_PORT/api/v1/proxy"| jq
+  add-wallet:
+    dotenv: [".env"]
+    cmds:
+      - |
+        curl -X POST "http://localhost:$APP_PORT/api/v1/wallet" \
+        -H "Content-Type: application/json" \
+        -d '{"pk": "{{.PK}}"}'| jq
+  remove-wallet:
+    dotenv: [".env"]
+    cmds:
+      - |
+        curl -X DELETE "http://localhost:$APP_PORT/api/v1/wallet/{{.ID}}" \
+        -H "Content-Type: application/json" | jq
+  get-wallet:
+    dotenv: [".env"]
+    cmds:
+      - curl -X GET "http://localhost:$APP_PORT/api/v1/wallet" | jq
+  get-signer:
+    dotenv: [".env"]
+    cmds:
+      - curl -X GET "http://localhost:$APP_PORT/api/v1/wallet/signer" | jq
+  add-json-rpc:
+    dotenv: [".env"]
+    cmds:
+      - |
+        curl -X POST "http://localhost:$APP_PORT/api/v1/provider-url" \
+        -H "Content-Type: application/json" \
+        -d '{"chain_id": {{.CHAIN_ID}}, "url": "{{.URL}}", "priority": {{.PRIORITY}}}' | jq
+  remove-json-rpc:
+    dotenv: [".env"]
+    cmds:
+      - |
+        curl -X DELETE "http://localhost:$APP_PORT/api/v1/provider-url/{{.ID}}" \
+        -H "Content-Type: application/json" | jq
+  get-json-rpc:
+    dotenv: [".env"]
+    cmds:
+      - curl -X GET "http://localhost:$APP_PORT/api/v1/provider-url" | jq
+  test:
+    cmds:
+      - task: test-db
+      - task: test-admin
+      - task: test-bus
+      - task: test-libp2p
+      - task: test-fetcher
+      - task: test-utils
+      - task: test-aggregator
+      - task: test-reporter
+      - task: test-chain
+      - task: test-wss
+      - task: test-websocketfetcher

@@ -1,0 +1,36 @@
+name: "vrf contracts: test"
+
+on:
+  push:
+    branches-ignore:
+      - "master"
+    paths:
+      - "contracts/v0.1/**/VRFCoordinator.sol"
+      - "contracts/v0.1/**/VRFConsumerBase.sol"
+      - "contracts/v0.1/**/vrf/**"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "20.10.0"
+          registry-url: "https://registry.npmjs.org"
+          scope: "@bisonai"
+          always-auth: true
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+      - run: yarn contracts install
+      - run: yarn contracts prettier-solidity-check
+      - run: yarn contracts solhint
+      - run: yarn contracts lint
+      - run: yarn contracts clean && yarn contracts build
+      - run: yarn vrf build
+      - run: yarn contracts-v01 test-vrf

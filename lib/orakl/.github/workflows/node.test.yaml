@@ -1,0 +1,106 @@
+name: "orakl node test"
+
+on:
+  push:
+    branches-ignore:
+      - "master"
+    paths:
+      - "node/**"
+  workflow_dispatch:
+
+jobs:
+  core-build:
+    strategy:
+      fail-fast: false
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: orakl-test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.22.3"
+          check-latest: true
+          cache-dependency-path: |
+            ./node/go.sum
+
+      - name: Run lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: v1.54
+          working-directory: node
+          skip-pkg-cache: true
+          skip-build-cache: true
+          args: --timeout=10m
+
+      - name: Run Vet
+        run: |
+          cd ./node
+          go install golang.org/x/tools/go/analysis/passes/shadow/cmd/shadow@latest
+          go vet ./...
+          go vet -vettool=$(which shadow) ./...
+
+      - name: Install golang-migrate
+        run: |
+          curl -L https://github.com/golang-migrate/migrate/releases/download/v4.17.0/migrate.linux-amd64.tar.gz | tar xvz
+          sudo mv ./migrate /usr/bin
+
+      - name: Migrate up
+        run: |
+          cd ./node
+          migrate -database "postgresql://postgres:postgres@localhost:5432/orakl-test?search_path=public&sslmode=disable" -verbose -path ./migrations/node up
+
+      - name: Install dependencies
+        run: |
+          cd ./node
+          go mod tidy
+
+      - name: Install Task
+        uses: arduino/setup-task@v2
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run test
+        run: |
+          cd ./node
+          task local:test
+        env:
+          DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/orakl-test?search_path=public"
+          REDIS_HOST: "localhost"
+          REDIS_PORT: "6379"
+          ENCRYPT_PASSWORD: "anything"
+          FETCHER_ETHEREUM_PROVIDER_URL: "https://ethereum-mainnet.g.allthatnode.com/full/evm"
+          FETCHER_CYPRESS_PROVIDER_URL: "https://klaytn-mainnet.g.allthatnode.com/full/evm"
+          KAIA_PROVIDER_URL: "https://public-en.kairos.node.kaia.io"
+          KAIA_REPORTER_PK: ${{ secrets.TEST_DELEGATOR_REPORTER_PK}}
+          ETH_PROVIDER_URL: "https://ethereum-sepolia.g.allthatnode.com/full/evm"
+          ETH_REPORTER_PK: ${{ secrets.TEST_DELEGATOR_REPORTER_PK}}
+          TEST_FEE_PAYER_PK: ${{ secrets.DELEGATOR_FEEPAYER_PK}}
+          SUBMISSION_PROXY_CONTRACT: "0x35bA1102A4954147272782302856BD8440227B85"
+          CHAIN: "test"
+          SIGNER_PK: ${{ secrets.TEST_DELEGATOR_REPORTER_PK}}

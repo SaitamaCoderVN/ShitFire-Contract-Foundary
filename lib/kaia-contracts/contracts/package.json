@@ -1,0 +1,28 @@
+{
+  "name": "@kaiachain/contracts",
+  "description": "Secure Smart Contract library for Solidity",
+  "version": "1.0.1",
+  "files": [
+    "**/*.sol",
+    "/build/contracts/*.json",
+    "!/mocks/**/*"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kaiachain/kaia-contracts.git"
+  },
+  "keywords": [
+    "solidity",
+    "ethereum",
+    "smart",
+    "contracts",
+    "security",
+    "zeppelin"
+  ],
+  "author": "Kaia Community <developer@kaia.io>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kaiachain/kaia-contracts/issues"
+  },
+  "homepage": "https://github.com/kaiachain/kaia-contracts#readme"
+}
